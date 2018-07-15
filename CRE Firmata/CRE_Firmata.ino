@@ -24,7 +24,7 @@ Last updated August 17th, 2017
 
 Creative Science Foundation Creative Robotix Platform Modifications.
 
-Last updated June 18th, 2018 
+Last updated June 23th, 2018 
 
 Compile Notes:
 
@@ -83,11 +83,20 @@ https://github.com/wayoda/LedControl
 #define CRE_SWING_ARMS				0x0B
 #define CRE_LOOK_AROUND				0x0C
 #define CRE_HCO6_CMD				0x0D
+#define CRE_VELOCITY				0x0E
 
 // CRE configuration
 #define CRE_DEFAULT_CONFIGURATION_INPUTS 0x000400 // each bit: 1 = pin in INPUT, 0 = anything else
 
 #define IS_PIN_DIGITAL_INPUT(p)        ((CRE_DEFAULT_CONFIGURATION_INPUTS >> p) & 0x01 )
+
+// Wheels, 
+
+#define PIN_LEFT_WHEEL_SERVO	2
+#define PIN_RIGHT_WHEEL_SERVO	3
+
+#define VELOCITY_LEFT			0
+#define VELOCITY_RIGHT			1
 
 // Arms, head and mouth pin assignments
 
@@ -121,14 +130,15 @@ https://github.com/wayoda/LedControl
 
 #define SPEAKER					13
 
-#define TEXT_TO_SAY_BUFFER_LEN	30
+#define TEXT_TO_SAY_BUFFER_LEN	40
 
-#define MELODY_TO_PLAY_BUFFER_LEN 40
+#define MELODY_TO_PLAY_BUFFER_LEN 30
 
 #define AUDIO_SAY			0
 #define AUDIO_MELODY_BLTIN	1
 #define AUDIO_MELODY_USR	2
 #define AUDIO_TONE			3
+#define AUDIO_MELODY_SPEED	4
 
 #define NOTE_RST 0
 #define NOTE_B0  31
@@ -222,7 +232,7 @@ https://github.com/wayoda/LedControl
 #define NOTE_DS8 4978
 #define NOTE_P0	 0000
 
-#define AUDIO_MELODIES_BLTIN	4
+#define AUDIO_MELODIES_BLTIN	5
 
 const static uint16_t AUDIO_MELODIES_NOTES[] PROGMEM = {
 	// Green Sleeves 
@@ -267,7 +277,22 @@ const static uint16_t AUDIO_MELODIES_NOTES[] PROGMEM = {
 	NOTE_D4, NOTE_A4,
 	NOTE_G4, NOTE_FS4, NOTE_E4, NOTE_D5, NOTE_A4,
 	NOTE_G4, NOTE_FS4, NOTE_E4, NOTE_D5, NOTE_A4,
-	NOTE_G4, NOTE_FS4, NOTE_G4, NOTE_E4
+	NOTE_G4, NOTE_FS4, NOTE_G4, NOTE_E4,
+	// Chariots of Fire
+	81,
+	NOTE_C4, NOTE_F4, NOTE_G4, NOTE_A4,
+	NOTE_G4, NOTE_E4, NOTE_RST, NOTE_C4, NOTE_F4, NOTE_G4, NOTE_A4,
+	NOTE_G4, NOTE_RST, NOTE_C4, NOTE_F4, NOTE_G4, NOTE_A4,
+	NOTE_G4, NOTE_E4, NOTE_RST, NOTE_E4, NOTE_F4, NOTE_E4, NOTE_C4,
+	NOTE_C4, NOTE_RST, NOTE_C4, NOTE_F4, NOTE_G4, NOTE_A4,
+	NOTE_G4, NOTE_E4, NOTE_RST, NOTE_C4, NOTE_F4, NOTE_G4, NOTE_A4,
+	NOTE_G4, NOTE_RST, NOTE_C4, NOTE_F4, NOTE_G4, NOTE_A4,
+	NOTE_G4, NOTE_E4, NOTE_RST, NOTE_E4, NOTE_F4, NOTE_E4, NOTE_C4,
+	NOTE_C4, NOTE_RST, NOTE_C5, NOTE_B4, NOTE_A4, NOTE_G4,
+	NOTE_B4, NOTE_G4, NOTE_A4, NOTE_F4, NOTE_G4, NOTE_C5, NOTE_B4, NOTE_A4, NOTE_G4,
+	NOTE_B4, NOTE_RST, NOTE_C5, NOTE_B4, NOTE_A4, NOTE_G4,
+	NOTE_B4, NOTE_G4, NOTE_A4, NOTE_F4, NOTE_G4, NOTE_E4, NOTE_F4, NOTE_E4, NOTE_C4,
+	NOTE_C4
 };
 
 const uint8_t AUDIO_MELODIES_NOTES_LEN = sizeof(AUDIO_MELODIES_NOTES) / sizeof(uint16_t);
@@ -315,7 +340,22 @@ const static uint8_t AUDIO_MELODIES_DURATIONS[] PROGMEM = {
 	2, 2, 
 	12, 12, 12, 2, 4,
 	12, 12, 12, 2, 4, 
-	12, 12, 12, 2
+	12, 12, 12, 2,
+	// Chariots of fire
+	81,
+	8, 12, 12, 12, 
+	4, 4, 8, 8, 12, 12, 12,
+	2, 8, 8, 12, 12, 12, 
+	4, 4, 8, 8, 12, 12, 12,
+	2, 8, 8, 12, 12, 12, 
+	4, 4, 8, 8, 12, 12, 12,
+	2, 8, 8, 12, 12, 12,
+	4, 4, 8, 8, 12, 12, 12,
+	2, 8, 8, 12, 12, 12,
+	4, 16, 4, 16, 4, 16, 12, 12, 12, 
+	2, 8, 8, 12, 12, 12,
+	4, 16, 4, 16, 4, 16, 12, 12, 12,
+	2
 };
 
 const uint8_t AUDIO_MELODIES_DURATIONS_LEN = sizeof(AUDIO_MELODIES_DURATIONS) / sizeof(uint8_t);
@@ -509,7 +549,7 @@ const int LED_DISPLAY_CHARACTERS_LEN = sizeof(LED_DISPLAY_CHARACTERS) / sizeof(u
 #define LED_DISPLAY_TYPE_ASCII			2
 
 
-#define TEXT_TO_SCROLL_BUFFER_LEN		30
+#define TEXT_TO_SCROLL_BUFFER_LEN		40
 
 /*==============================================================================
 * GLOBAL VARIABLES
@@ -596,6 +636,8 @@ boolean isTextToScroll = false;
 boolean isTextToSay = false;
 boolean isMelodyToPlay = false;
 
+boolean isUserMelody = false;
+
 uint8_t ledDisplayImage = 0, ledDisplayDigits = 0, ledDisplayASCII = 0;
 
 uint8_t ledDisplayType = 0;
@@ -605,7 +647,8 @@ uint8_t armSwingSpeed = 0, headSwingSpeed = 0;
 uint8_t textToScrollLen = 0;
 byte textToScrollBuffer[TEXT_TO_SCROLL_BUFFER_LEN];
 
-uint8_t	melodyToPlayLen = 0;
+float melodyToPlaySpeed = 1.0;
+uint8_t	melodyToPlayLen = 0, melodyRecordStart = 0;
 uint16_t melodyToPlayNoteBuffer[MELODY_TO_PLAY_BUFFER_LEN];
 uint8_t melodyToPlayDurationBuffer[MELODY_TO_PLAY_BUFFER_LEN];
 
@@ -729,9 +772,10 @@ void updateTextToSay() {
 	}
 }
 
-void updateMelodyToPlay() {
+void updateMelodyToPlay(boolean _isUserMelody) {
 	/* timer variables */
 	static uint8_t note = 0;
+	static uint16_t noteFrequency;
 	static boolean noteActive = false, notePause = false;
 	static unsigned long l_currentMillis;	// store the current value from millis()
 	static unsigned long l_previousMillis;	// for comparison with currentMillis
@@ -745,10 +789,17 @@ void updateMelodyToPlay() {
 		note = 0;
 		melodyToPlayLen = 0;
 	}
-	else { // Still have a character to say, have we finished the tone?
+	else { // Still have a note to play, have we finished the note?
 		if (!noteActive) { // If no active note, play the next one
-			noteDuration = (1000 / melodyToPlayDurationBuffer[note]);
-			tone(SPEAKER, melodyToPlayNoteBuffer[note], noteDuration); // convert character to suitable frequency, currently arbitary, update?
+			if (_isUserMelody) {
+				noteDuration = ((1000.0 / melodyToPlaySpeed) / (float)melodyToPlayDurationBuffer[note]);
+				noteFrequency = melodyToPlayNoteBuffer[note];
+			}
+			else {
+				noteDuration = ((1000.0 / melodyToPlaySpeed) / (float)pgm_read_byte(&(AUDIO_MELODIES_DURATIONS[melodyRecordStart + note])));
+				noteFrequency = pgm_read_word(&(AUDIO_MELODIES_NOTES[melodyRecordStart + note]));
+			}
+			tone(SPEAKER, noteFrequency, noteDuration);
 			noteActive = true;
 			l_previousMillis = l_currentMillis;
 		}
@@ -835,8 +886,9 @@ void updateArmsSwing() {
 
 	l_currentMillis = millis();
 
-	if (!servos[servoPinMap[PIN_RIGHT_ARM_SERVO]].attached()) setPinModeCallback(PIN_RIGHT_ARM_SERVO, PIN_MODE_SERVO);
-	if (!servos[servoPinMap[PIN_LEFT_ARM_SERVO]].attached()) setPinModeCallback(PIN_LEFT_ARM_SERVO, PIN_MODE_SERVO);
+	// Enable servos?
+	if (servoPinMap[PIN_RIGHT_ARM_SERVO] == 255 || !servos[servoPinMap[PIN_RIGHT_ARM_SERVO]].attached()) setPinModeCallback(PIN_RIGHT_ARM_SERVO, PIN_MODE_SERVO);
+	if (servoPinMap[PIN_LEFT_ARM_SERVO] == 255 || !servos[servoPinMap[PIN_LEFT_ARM_SERVO]].attached()) setPinModeCallback(PIN_LEFT_ARM_SERVO, PIN_MODE_SERVO);
 
 	if ((l_currentMillis - l_previousMillis) > armSwingInterval) {
 
@@ -857,6 +909,18 @@ void stopArmsSwing() {
 	setPinModeCallback(PIN_LEFT_ARM_SERVO, PIN_MODE_OUTPUT);
 }
 
+void setVelocityLeftWheel(uint8_t velocity) {
+	if (servoPinMap[PIN_LEFT_WHEEL_SERVO] == 255 || !servos[servoPinMap[PIN_LEFT_WHEEL_SERVO]].attached()) setPinModeCallback(PIN_LEFT_WHEEL_SERVO, PIN_MODE_SERVO);
+
+	analogWriteCallback(PIN_LEFT_WHEEL_SERVO, velocity);
+}
+
+void setVelocityRightWheel(uint8_t velocity) {
+	if (servoPinMap[PIN_RIGHT_WHEEL_SERVO] == 255 || !servos[servoPinMap[PIN_RIGHT_WHEEL_SERVO]].attached()) setPinModeCallback(PIN_RIGHT_WHEEL_SERVO, PIN_MODE_SERVO);
+
+	analogWriteCallback(PIN_RIGHT_WHEEL_SERVO, velocity);
+}
+
 void updateHeadSwing() {
 	static uint8_t angle = 90;
 	static int8_t direction = 1;
@@ -865,7 +929,10 @@ void updateHeadSwing() {
 
 	l_currentMillis = millis();
 
-	if (!servos[servoPinMap[PIN_HEAD_SERVO]].attached()) setPinModeCallback(PIN_HEAD_SERVO, PIN_MODE_SERVO);
+	// Enable servo?
+	if (servoPinMap[PIN_HEAD_SERVO] == 255 || !servos[servoPinMap[PIN_HEAD_SERVO]].attached()) {  
+		setPinModeCallback(PIN_HEAD_SERVO, PIN_MODE_SERVO);
+	}
 	
 	if ((l_currentMillis - l_previousMillis) > headSwingInterval) {
 
@@ -1625,21 +1692,21 @@ void sysexCallback(byte command, byte argc, byte *argv)
 		case AUDIO_MELODY_BLTIN:
 		{
 			
+			// Locate the melody in the melody table 
+
 			uint8_t melody = argv[1] % AUDIO_MELODIES_BLTIN;
 
-			uint8_t melody_record_start = 0;
+			melodyRecordStart = 0; // Reset the record start
 
 			for (uint8_t i = 0; i < melody; i++) {  // Work out melodies location
-				melody_record_start += pgm_read_word(&(AUDIO_MELODIES_NOTES[melody_record_start])) + 1; // melody record number_of_notes (+1);
+				melodyRecordStart += pgm_read_word(&(AUDIO_MELODIES_NOTES[melodyRecordStart])) + 1; // melody record number_of_notes (+1);
 			}
 
-			melodyToPlayLen = pgm_read_word(&(AUDIO_MELODIES_NOTES[melody_record_start])); 
+			melodyToPlayLen = pgm_read_word(&(AUDIO_MELODIES_NOTES[melodyRecordStart]));
 
-			for (uint8_t i = 0; i < melodyToPlayLen; i++) {
-				melodyToPlayNoteBuffer[i] = pgm_read_word(&(AUDIO_MELODIES_NOTES[melody_record_start + i + 1])); // offset the melody record start for first note in record
-				melodyToPlayDurationBuffer[i] = pgm_read_byte(&(AUDIO_MELODIES_DURATIONS[melody_record_start + i + 1]));
-			}
+			melodyRecordStart = melodyRecordStart + 1; // offset the melody record start for first note in record
 
+			isUserMelody = false;
 			isMelodyToPlay = true;
 		}
 		break;
@@ -1648,19 +1715,27 @@ void sysexCallback(byte command, byte argc, byte *argv)
 			melodyToPlayLen = 0;
 			for (uint8_t i = 1; i < argc  && (melodyToPlayLen < MELODY_TO_PLAY_BUFFER_LEN); i += 3) { // each note have three bytes <freqency high byte, frequency low byte, duration> Silently drop notes > MAX_BUFFER
 
-				melodyToPlayNoteBuffer[melodyToPlayLen] = (argv[i] << 8) | argv[i + 1];
+				melodyToPlayNoteBuffer[melodyToPlayLen] = (argv[i] << 8) | argv[i + 1];  // Recombine HIGH / LOW bytes 
 				melodyToPlayDurationBuffer[melodyToPlayLen] = argv[i + 2];
 				melodyToPlayLen++;
 			}
+
+			isUserMelody = true;
 			isMelodyToPlay = true;
 		}
 		break;
 		case AUDIO_TONE:
 		{
 			melodyToPlayNoteBuffer[0] = (argv[1] << 8) | argv[2];
-			melodyToPlayDurationBuffer[0] = 1000 / ((argv[3] << 8) | argv[4]);
+			melodyToPlayDurationBuffer[0] = (1000.0 / (float)((argv[3] << 8) | argv[4])) / melodyToPlaySpeed; // Rescale with melodyToPlaySpeed
 			melodyToPlayLen = 1;
+			isUserMelody = true;
 			isMelodyToPlay = true;
+		}
+		break;
+		case AUDIO_MELODY_SPEED:
+		{
+			melodyToPlaySpeed = (float)((argv[1] << 8) | argv[2]) / 100.0;
 		}
 		break;
 		}
@@ -1843,6 +1918,17 @@ void sysexCallback(byte command, byte argc, byte *argv)
 			}
 	}
 	break;
+	case CRE_VELOCITY:
+	{
+		if (argv[0] != 0x00) {
+			setVelocityLeftWheel(argv[0]);
+		}
+
+		if (argv[1] != 0x00) {
+			setVelocityRightWheel(argv[1]);
+		}
+	}
+	break;
 	}
 }
 
@@ -1988,7 +2074,7 @@ void loop()
 		if (isTextToScroll) updateTextToScroll(false);
 		if (isArmsSwing) updateArmsSwing();
 		if (isHeadSwing) updateHeadSwing();
-		if (isMelodyToPlay) updateMelodyToPlay();
+		if (isMelodyToPlay) updateMelodyToPlay(isUserMelody);
 	}
 	
 #ifdef FIRMATA_SERIAL_FEATURE
