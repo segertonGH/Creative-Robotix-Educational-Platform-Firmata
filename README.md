@@ -1,5 +1,7 @@
-# Creative Robotix Educational Platform Snap4Arduino Firmata
-A Firmata version for use with the Creative Robotix Educational Platform with Snap4Arduino
+# Creative Robotix Educational Platform Firmata
+A Firmata version for use with the Creative Robotix Educational Platform.
+
+Drivers currently exist for Snap4Arduino.
 
 Creative Robotix is a project by the Creative Science Foundation.  It is a fully customizable
 robotics platform, with body parts that can be 3D printed and contstructed with low cost open hardware.
