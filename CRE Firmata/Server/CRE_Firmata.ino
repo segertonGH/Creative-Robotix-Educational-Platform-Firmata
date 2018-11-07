@@ -24,7 +24,7 @@ Last updated August 17th, 2017
 
 Creative Science Foundation Creative Robotix Platform Modifications.
 
-Last updated June 23th, 2018 
+Last updated November 11th, 2018 
 
 Compile Notes:
 
@@ -43,7 +43,7 @@ https://github.com/wayoda/LedControl
 
 // Edit this to rename your robot, you may also rename your robot via Firmata 
    
-#define MY_ROBOTS_NAME		"Codee"
+#define MY_ROBOTS_NAME		"TeacherR"
 
 
 // Edit this to give your robot a new pin number
@@ -86,9 +86,12 @@ https://github.com/wayoda/LedControl
 #define CRE_VELOCITY				0x0E
 
 // CRE configuration
-#define CRE_DEFAULT_CONFIGURATION_INPUTS 0x000400 // each bit: 1 = pin in INPUT, 0 = anything else
+#define CRE_DEFAULT_CONFIGURATION_INPUTS 0x000C00 // each bit: 1 = pin in INPUT, 0 = anything else, configures pins 10 and 12 as digital inputs.
 
 #define IS_PIN_DIGITAL_INPUT(p)        ((CRE_DEFAULT_CONFIGURATION_INPUTS >> p) & 0x01 )
+
+// Demo
+#define PIN_DEMO				12
 
 // Wheels, 
 
@@ -103,8 +106,6 @@ https://github.com/wayoda/LedControl
 #define PIN_LEFT_ARM_SERVO		4
 #define PIN_RIGHT_ARM_SERVO		5
 #define PIN_HEAD_SERVO			6
-#define PIN_MOUTH_RED			14
-#define PIN_MOUTH_GREEN			15
 
 // Behaviour limits for arms and head
 
@@ -666,7 +667,6 @@ uint8_t hc06DataBuffer[HC06_DATA_BUFFER_LEN];
 *============================================================================*/
 
 void initCreativeRobotixPlatform() {
-	uint64_t character;
 
 	// Initialise the MAX72XX display 
 
@@ -684,6 +684,116 @@ void initCreativeRobotixPlatform() {
 	setLEDDisplayImage(LED_DISPLAY_SMILE);
 }
 
+boolean demoCreativeRobotixPlatform() {
+
+	uint8_t counter = 0;
+	uint8_t melody = 4;
+
+	pinMode(PIN_DEMO, INPUT_PULLUP);  // Why do we need to do this? Should already be set by setup()
+
+	if (digitalRead(PIN_DEMO) == HIGH) {
+		return (false);
+	}
+
+	// Ensure ultrasound pins have the correct sense
+	setPinModeCallback(HCSR04_TRIGGER, OUTPUT);
+	setPinModeCallback(HCSR04_ECHO, INPUT);
+
+	armSwingSpeed = 2;
+	isArmsSwing = true;
+	headSwingSpeed = 2;
+	isHeadSwing = true;
+	
+	setMelodytoPlay(melody);
+	isUserMelody = false;
+	isMelodyToPlay = true;
+
+	// Move forwards
+	setVelocityLeftWheel(100);
+	setVelocityRightWheel(80);
+
+	delay(2000);
+
+	// Stop
+
+	setVelocityLeftWheel(90);
+	setVelocityRightWheel(90);
+
+	delay(250);
+
+	// Move backwards
+	setVelocityLeftWheel(80);
+	setVelocityRightWheel(100);
+
+	delay(2000);
+
+	// Stop
+	setVelocityLeftWheel(90);
+	setVelocityRightWheel(90);
+	
+	// Event Loop 
+	while (true) {
+		if (isTextToSay) updateTextToSay();
+		if (isTextToScroll) updateTextToScroll(false);
+		if (isArmsSwing) updateArmsSwing();
+		if (isHeadSwing) updateHeadSwing();
+		if (isMelodyToPlay) {
+			updateMelodyToPlay(isUserMelody);
+		}
+		else {
+			// Stop Head
+			isHeadSwing = false;
+
+			// Step Arms
+			isArmsSwing = false;
+
+			// Read ultrasound
+
+			uint8_t range = sonar.ping_cm(); // Take reading in cm
+
+			// Let's say and see the range
+			if (range) {
+				setLEDDisplayDigits(range);
+
+				// easter egg at 10
+				if (range == 10) {
+					counter++;
+
+					if (counter == 128) {
+						counter = 0;
+
+						setMelodytoPlay((++melody) % AUDIO_MELODIES_BLTIN);
+						isUserMelody = false;
+						isMelodyToPlay = true;
+						isArmsSwing = true;
+						isHeadSwing = true;
+						setLEDDisplayImage(LED_DISPLAY_SMILE);
+					}
+				}
+				else {
+					counter = 0;
+					char out = (126 - HCSR04_MAX_DISTANCE) + range; // TODO: Bug, when set to 128. Range returns 61? sayDirect casues freeze. Power spikes? 
+					sayDirect((String)out);
+				}
+
+				// close range for hugs ? 
+				if (range > 0 && range < 8) {
+					setLeftArm(90 - ARM_SWING_MAX_DEGREES);
+					setRightArm(90 + ARM_SWING_MAX_DEGREES);
+				}
+				else {
+					setLeftArm(90);
+					setRightArm(90);
+				}
+			}
+			else {
+				setLEDDisplayImage(LED_DISPLAY_SMILE);
+				setLeftArm(90);
+				setRightArm(90);
+			}
+		}
+	}
+}
 
 void restoreLEDDisplay(void) {
 	switch (ledDisplayType) {
@@ -770,6 +880,18 @@ void updateTextToSay() {
 			}
 		}
 	}
+}
+
+void setMelodytoPlay(uint8_t melody) {
+	melodyRecordStart = 0; // Reset the record start
+
+	for (uint8_t i = 0; i < melody; i++) {  // Work out melodies location
+		melodyRecordStart += pgm_read_word(&(AUDIO_MELODIES_NOTES[melodyRecordStart])) + 1; // melody record number_of_notes (+1);
+	}
+
+	melodyToPlayLen = pgm_read_word(&(AUDIO_MELODIES_NOTES[melodyRecordStart]));
+
+	melodyRecordStart = melodyRecordStart + 1; // offset the melody record start for first note in record
 }
 
 void updateMelodyToPlay(boolean _isUserMelody) {
@@ -886,18 +1008,14 @@ void updateArmsSwing() {
 
 	l_currentMillis = millis();
 
-	// Enable servos?
-	if (servoPinMap[PIN_RIGHT_ARM_SERVO] == 255 || !servos[servoPinMap[PIN_RIGHT_ARM_SERVO]].attached()) setPinModeCallback(PIN_RIGHT_ARM_SERVO, PIN_MODE_SERVO);
-	if (servoPinMap[PIN_LEFT_ARM_SERVO] == 255 || !servos[servoPinMap[PIN_LEFT_ARM_SERVO]].attached()) setPinModeCallback(PIN_LEFT_ARM_SERVO, PIN_MODE_SERVO);
-
 	if ((l_currentMillis - l_previousMillis) > armSwingInterval) {
 
 		if (angle < (90 - ARM_SWING_MAX_DEGREES) || angle > (90 + ARM_SWING_MAX_DEGREES)) direction = direction * -1; // change direction
 
 		angle = angle + (armSwingSpeed * direction);
 
-		analogWriteCallback(PIN_RIGHT_ARM_SERVO, angle);
-		analogWriteCallback(PIN_LEFT_ARM_SERVO, angle);
+		setLeftArm(angle);
+		setRightArm(angle);
 
 		// update variables
 		l_previousMillis = l_currentMillis;
@@ -908,6 +1026,27 @@ void stopArmsSwing() {
 	setPinModeCallback(PIN_RIGHT_ARM_SERVO, PIN_MODE_OUTPUT);
 	setPinModeCallback(PIN_LEFT_ARM_SERVO, PIN_MODE_OUTPUT);
 }
+
+void setLeftArm(uint8_t angle) {
+	// Enable servos?
+	if (servoPinMap[PIN_LEFT_ARM_SERVO] == 255 || !servos[servoPinMap[PIN_LEFT_ARM_SERVO]].attached()) setPinModeCallback(PIN_LEFT_ARM_SERVO, PIN_MODE_SERVO);
+
+	if (angle < (90 - ARM_SWING_MAX_DEGREES)) angle = 90 - ARM_SWING_MAX_DEGREES;
+	if (angle > (90 + ARM_SWING_MAX_DEGREES)) angle = 90 + ARM_SWING_MAX_DEGREES;
+			
+	analogWriteCallback(PIN_LEFT_ARM_SERVO, angle);
+}
+
+void setRightArm(uint8_t angle) {
+	// Enable servos?
+	if (servoPinMap[PIN_RIGHT_ARM_SERVO] == 255 || !servos[servoPinMap[PIN_RIGHT_ARM_SERVO]].attached()) setPinModeCallback(PIN_RIGHT_ARM_SERVO, PIN_MODE_SERVO);
+
+	if (angle < (90 - ARM_SWING_MAX_DEGREES)) angle = 90 - ARM_SWING_MAX_DEGREES;
+	if (angle > (90 + ARM_SWING_MAX_DEGREES)) angle = 90 + ARM_SWING_MAX_DEGREES;
+
+	analogWriteCallback(PIN_RIGHT_ARM_SERVO, angle);
+}
+
 
 void setVelocityLeftWheel(uint8_t velocity) {
 	if (servoPinMap[PIN_LEFT_WHEEL_SERVO] == 255 || !servos[servoPinMap[PIN_LEFT_WHEEL_SERVO]].attached()) setPinModeCallback(PIN_LEFT_WHEEL_SERVO, PIN_MODE_SERVO);
@@ -929,18 +1068,13 @@ void updateHeadSwing() {
 
 	l_currentMillis = millis();
 
-	// Enable servo?
-	if (servoPinMap[PIN_HEAD_SERVO] == 255 || !servos[servoPinMap[PIN_HEAD_SERVO]].attached()) {  
-		setPinModeCallback(PIN_HEAD_SERVO, PIN_MODE_SERVO);
-	}
-	
 	if ((l_currentMillis - l_previousMillis) > headSwingInterval) {
 
 		angle = angle + (headSwingSpeed * direction);
 
 		if (angle < (90 - HEAD_SWING_MAX_DEGREES) || angle > (90 + HEAD_SWING_MAX_DEGREES)) direction = direction * -1; // change direction
 
-		analogWriteCallback(PIN_HEAD_SERVO, angle);
+		setHead(angle);
 
 		// update variables
 		l_previousMillis = l_currentMillis;
@@ -951,13 +1085,25 @@ void stopHeadSwing() {
 	setPinModeCallback(PIN_HEAD_SERVO, PIN_MODE_OUTPUT);
 }
 
+void setHead(uint8_t angle) {
+	// Enable servos?
+
+	if (servoPinMap[PIN_HEAD_SERVO] == 255 || !servos[servoPinMap[PIN_HEAD_SERVO]].attached()) setPinModeCallback(PIN_HEAD_SERVO, PIN_MODE_SERVO);
+	
+	if (angle < (90 - HEAD_SWING_MAX_DEGREES)) angle = 90 - HEAD_SWING_MAX_DEGREES;
+	if (angle >(90 + HEAD_SWING_MAX_DEGREES)) angle = 90 + HEAD_SWING_MAX_DEGREES;
+
+	analogWriteCallback(PIN_HEAD_SERVO, angle);
+}
+
 void sayDirect(String text) { 
 	// Say text string, uses delay, private use only
-	uint8_t state = 5;
 	for (uint8_t i = 0; i < text.length(); i++) {
-		tone(SPEAKER, (128 - text[i]) * 100, text[i] / 2);
-		delay(text[i] / 2);
-		noTone(SPEAKER);
+		if (text[i] < 128) {
+			tone(SPEAKER, (128 - text[i]) * 100, text[i] / 2); // Arbitary frequency mapping, for printable characters only.
+			delay(text[i] / 2);
+			noTone(SPEAKER);
+		}
 	}
 }
 
@@ -1659,7 +1805,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
 #endif
 		break;
 
-	/////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////  //TODO: Tidy up cases...
 	//////// CRE Cases
 	////////////////////////////////////////////////////
 	case CRE_ULTRASOUND:
@@ -1672,7 +1818,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
 		// Write result
 		Firmata.write(START_SYSEX);
 		Firmata.write(STRING_DATA);
-		Serial.println((byte)range);  // Can we use Firmata.write(ULTRASOUND); Firmata.write(range);?
+		//Serial.println((byte)range);  // Can we use Firmata.write(ULTRASOUND); Firmata.write(range);?
+		Serial.println((unsigned int)range);  // Try this? 
 		Firmata.write(END_SYSEX);
 	}
 	break;
@@ -1696,15 +1843,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
 
 			uint8_t melody = argv[1] % AUDIO_MELODIES_BLTIN;
 
-			melodyRecordStart = 0; // Reset the record start
-
-			for (uint8_t i = 0; i < melody; i++) {  // Work out melodies location
-				melodyRecordStart += pgm_read_word(&(AUDIO_MELODIES_NOTES[melodyRecordStart])) + 1; // melody record number_of_notes (+1);
-			}
-
-			melodyToPlayLen = pgm_read_word(&(AUDIO_MELODIES_NOTES[melodyRecordStart]));
-
-			melodyRecordStart = melodyRecordStart + 1; // offset the melody record start for first note in record
+			setMelodytoPlay(melody);
 
 			isUserMelody = false;
 			isMelodyToPlay = true;
@@ -1713,7 +1852,7 @@ void sysexCallback(byte command, byte argc, byte *argv)
 		case AUDIO_MELODY_USR:
 		{	
 			melodyToPlayLen = 0;
-			for (uint8_t i = 1; i < argc  && (melodyToPlayLen < MELODY_TO_PLAY_BUFFER_LEN); i += 3) { // each note have three bytes <freqency high byte, frequency low byte, duration> Silently drop notes > MAX_BUFFER
+			for (uint8_t i = 1; i < argc  && (melodyToPlayLen < MELODY_TO_PLAY_BUFFER_LEN); i += 3) { // each note has three bytes <freqency high byte, frequency low byte, duration> Silently drop notes > MAX_BUFFER
 
 				melodyToPlayNoteBuffer[melodyToPlayLen] = (argv[i] << 8) | argv[i + 1];  // Recombine HIGH / LOW bytes 
 				melodyToPlayDurationBuffer[melodyToPlayLen] = argv[i + 2];
@@ -1966,8 +2105,8 @@ void systemResetCallback()
 		}
 		else if (IS_PIN_DIGITAL(i)) {
 			if (IS_PIN_DIGITAL_INPUT(i)) {
-				// sets pin to input, configures portConfigInputs
-				setPinModeCallback(i, INPUT);
+				// sets pin to input, configures portConfigInputs, with PULL_UP enabled.
+				setPinModeCallback(i, PIN_MODE_PULLUP);
 			}
 			else {
 				// sets the output to 0, configures portConfigInputs
@@ -2028,6 +2167,8 @@ void setup()
 	systemResetCallback();  // reset to default config
 
 	initCreativeRobotixPlatform(); // Initialise robot
+
+	demoCreativeRobotixPlatform(); // Do we demo? 
 }
 
 /*==============================================================================
