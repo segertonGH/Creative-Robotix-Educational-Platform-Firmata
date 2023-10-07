@@ -58,6 +58,7 @@ https://github.com/wayoda/LedControl
 #include <Firmata.h>
 #include <NewPing.h>	
 #include <LedControl.h>
+#include <SoftwareSerial.h>
 
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000

@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CreativeRobotix", "CreativeRobotix\CreativeRobotix.vcxitems", "{B83B795C-C6F9-4F3E-9B9E-4A760E372420}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "demo", "CreativeRobotix\examples\demo\demo.vcxproj", "{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Debug|ARM64 = Debug|ARM64
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|ARM = Release|ARM
+		Release|ARM64 = Release|ARM64
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|ARM.ActiveCfg = Debug|ARM
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|ARM.Build.0 = Debug|ARM
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|ARM.Deploy.0 = Debug|ARM
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|ARM64.Build.0 = Debug|ARM64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|ARM64.Deploy.0 = Debug|ARM64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|x64.ActiveCfg = Debug|x64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|x64.Build.0 = Debug|x64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|x64.Deploy.0 = Debug|x64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|x86.ActiveCfg = Debug|x86
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|x86.Build.0 = Debug|x86
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Debug|x86.Deploy.0 = Debug|x86
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|ARM.ActiveCfg = Release|ARM
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|ARM.Build.0 = Release|ARM
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|ARM.Deploy.0 = Release|ARM
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|ARM64.ActiveCfg = Release|ARM64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|ARM64.Build.0 = Release|ARM64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|ARM64.Deploy.0 = Release|ARM64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|x64.ActiveCfg = Release|x64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|x64.Build.0 = Release|x64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|x64.Deploy.0 = Release|x64
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|x86.ActiveCfg = Release|x86
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|x86.Build.0 = Release|x86
+		{4C61D9CA-F088-41AB-829F-BE0CA4BBF9A8}.Release|x86.Deploy.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {74E5754B-5020-4FD3-9893-5797C6EC11E5}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		CreativeRobotix\CreativeRobotix.vcxitems*{4c61d9ca-f088-41ab-829f-be0ca4bbf9a8}*SharedItemsImports = 4
+		CreativeRobotix\CreativeRobotix.vcxitems*{b83b795c-c6f9-4f3e-9b9e-4a760e372420}*SharedItemsImports = 9
+	EndGlobalSection
+EndGlobal

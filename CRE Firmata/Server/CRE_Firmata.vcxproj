@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{BD10D773-8722-4747-8E72-87E8D0F33846}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_VMICRO_INTELLISENSE;__AVR_atmega328p__;__AVR_ATmega328P__;__AVR_ATmega328p__;_VMDEBUG=1;F_CPU=16000000L;ARDUINO=108019;ARDUINO_AVR_NANO;ARDUINO_ARCH_AVR;__cplusplus=201103L;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\Server;$(ProjectDir)..\..\..\..\..\AppData\Local\arduino15\packages\arduino\hardware\avr\1.8.6\cores\arduino;$(ProjectDir)..\..\..\..\..\AppData\Local\arduino15\packages\arduino\hardware\avr\1.8.6\variants\eightanaloginputs;$(ProjectDir)..\..\..\..\..\..\..\Program Files (x86)\Arduino\libraries\Servo\src;$(ProjectDir)..\..\..\..\..\AppData\Local\arduino15\packages\arduino\hardware\avr\1.8.6\libraries\Wire\src;$(ProjectDir)..\..\..\..\..\..\..\Program Files (x86)\Arduino\libraries\Firmata;$(ProjectDir)..\..\..\..\..\Documents\Arduino\libraries\NewPing\src;$(ProjectDir)..\..\..\..\..\Documents\Arduino\libraries\LedControl\src;$(ProjectDir)..\..\..\..\..\AppData\Local\arduino15\packages\arduino\hardware\avr\1.8.6\libraries\SoftwareSerial\src;$(ProjectDir)..\..\..\..\..\..\..\Program Files (x86)\Arduino\libraries\Firmata\utility;$(ProjectDir)..\..\..\..\..\AppData\Local\arduino15\packages\arduino\hardware\avr\1.8.6\libraries\Wire\src\utility;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\source\\repos\\Creative-Robotix-Educational-Platform-Firmata\\CRE Firmata\\Server;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\cores\\arduino;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\variants\\eightanaloginputs;$(ProjectDir)..\..\..\..\..\..\..\\program files\\microsoft visual studio\\2022\\community\\common7\\ide\\extensions\\attszn5x.scx\\Micro Platforms\\default\\debuggers\\VM_DBG;$(ProjectDir)..\..\..\..\..\..\..\\Program Files (x86)\\Arduino\\libraries\\Servo\\src;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\Wire\\src;$(ProjectDir)..\..\..\..\..\..\..\\Program Files (x86)\\Arduino\\libraries\\Firmata;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\Documents\\Arduino\\libraries\\NewPing\\src;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\Documents\\Arduino\\libraries\\LedControl\\src;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\hardware\\avr\\1.8.6\\libraries\\SoftwareSerial\\src;$(ProjectDir)..\..\..\..\..\..\..\\Program Files (x86)\\Arduino\\libraries\\Firmata\\utility;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\\\lib\\gcc\\avr\\7.3.0\\include;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\avr\\include;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\\\lib\\gcc\\avr\\7.3.0\\include;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\avr\\include-fixed;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\avr\\include\\avr;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\lib\\gcc\\avr\\4.8.1\\include;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\lib\\gcc\\avr\\4.9.2\\include;$(ProjectDir)..\..\..\..\..\..\..\\Users\\SEgerton\\AppData\\Local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\lib\\gcc\\avr\\4.9.3\\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(ProjectDir)__vm\.Server.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="CRE_Firmata.ino">
+      <DeploymentContent>true</DeploymentContent>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="__vm\.Server.vsarduino.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties config.Debug.customdebug_nano_atmega328old_debugger_type="universal" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
