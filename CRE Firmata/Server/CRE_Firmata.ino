@@ -43,7 +43,7 @@ https://github.com/wayoda/LedControl
 
 // Edit this to rename your robot, you may also rename your robot via Firmata 
    
-#define MY_ROBOTS_NAME		"TeacherR"
+#define MY_ROBOTS_NAME		"Codee"
 
 
 // Edit this to give your robot a new pin number
