@@ -1,11 +1,11 @@
 /*
  Name:		CreativeRobotix.cpp
- Created:	10/7/2023 4:25:23 PM
- Author:	SEgerton
+ Created:	7/10/2023 4:25:23 PM
+ Author:	Simon Egerton
 
-Creative Science Foundation Creative Robotix Platform Modifications.
+Creative Science Foundation Creative Robotix.
 
-Last updated October 7th, 2023
+Last updated October 18th, 2023
 
 Compile Notes:
 
@@ -24,7 +24,21 @@ https://github.com/wayoda/LedControl
 #include "CreativeRobotix.h"
 #include <arduino.h>
 
-// Wheels, 
+
+// Auxilary analoge inputs
+
+#define PIN_AUX_0				A0
+#define PIN_AUX_1				A1
+
+// Line sensors
+
+#define PIN_LINE1				A2
+#define PIN_LINE2				A3
+#define PIN_LINE3				A4
+#define PIN_LINE4				A5
+#define PIN_LINE5				A6
+
+// Wheels 
 
 #define PIN_LEFT_WHEEL_SERVO	2
 #define PIN_RIGHT_WHEEL_SERVO	3
@@ -32,7 +46,7 @@ https://github.com/wayoda/LedControl
 #define VELOCITY_LEFT			0
 #define VELOCITY_RIGHT			1
 
-// Arms, head and mouth pin assignments
+// Arms, head
 
 #define PIN_LEFT_ARM_SERVO		4
 #define PIN_RIGHT_ARM_SERVO		5
@@ -40,12 +54,15 @@ https://github.com/wayoda/LedControl
 
 // Behaviour limits for arms and head
 
-#define ARM_SWING_MAX_DEGREES	50
-#define HEAD_SWING_MAX_DEGREES	50
+#define ARM_MAX_DEGREES			80
+#define ARM_SWING_MAX_DEGREES	40
+#define HEAD_SWING_MAX_DEGREES	40
+#define HEAD_SWING_MAX_SPEED	5
+#define ARMS_SWING_MAX_SPEED	5
 
 // Speaker
 
-#define SPEAKER					13
+#define PIN_SPEAKER					13
 
 #define AUDIO_SAY			0
 #define AUDIO_MELODY_BLTIN	1
@@ -53,97 +70,13 @@ https://github.com/wayoda/LedControl
 #define AUDIO_TONE			3
 #define AUDIO_MELODY_SPEED	4
 
-#define NOTE_RST 0
-#define NOTE_B0  31
-#define NOTE_C1  33
-#define NOTE_CS1 35
-#define NOTE_D1  37
-#define NOTE_DS1 39
-#define NOTE_E1  41
-#define NOTE_F1  44
-#define NOTE_FS1 46
-#define NOTE_G1  49
-#define NOTE_GS1 52
-#define NOTE_A1  55
-#define NOTE_AS1 58
-#define NOTE_B1  62
-#define NOTE_C2  65
-#define NOTE_CS2 69
-#define NOTE_D2  73
-#define NOTE_DS2 78
-#define NOTE_E2  82
-#define NOTE_F2  87
-#define NOTE_FS2 93
-#define NOTE_G2  98
-#define NOTE_GS2 104
-#define NOTE_A2  110
-#define NOTE_AS2 117
-#define NOTE_B2  123
-#define NOTE_C3  131
-#define NOTE_CS3 139
-#define NOTE_D3  147
-#define NOTE_DS3 156
-#define NOTE_E3  165
-#define NOTE_F3  175
-#define NOTE_FS3 185
-#define NOTE_G3  196
-#define NOTE_GS3 208
-#define NOTE_A3  220
-#define NOTE_AS3 233
-#define NOTE_B3  247
-#define NOTE_C4  262
-#define NOTE_CS4 277
-#define NOTE_D4  294
-#define NOTE_DS4 311
-#define NOTE_E4  330
-#define NOTE_F4  349
-#define NOTE_FS4 370
-#define NOTE_G4  392
-#define NOTE_GS4 415
-#define NOTE_A4  440
-#define NOTE_AS4 466
-#define NOTE_B4  494
-#define NOTE_C5  523
-#define NOTE_CS5 554
-#define NOTE_D5  587
-#define NOTE_DS5 622
-#define NOTE_E5  659
-#define NOTE_F5  698
-#define NOTE_FS5 740
-#define NOTE_G5  784
-#define NOTE_GS5 831
-#define NOTE_A5  880
-#define NOTE_AS5 932
-#define NOTE_B5  988
-#define NOTE_C6  1047
-#define NOTE_CS6 1109
-#define NOTE_D6  1175
-#define NOTE_DS6 1245
-#define NOTE_E6  1319
-#define NOTE_F6  1397
-#define NOTE_FS6 1480
-#define NOTE_G6  1568
-#define NOTE_GS6 1661
-#define NOTE_A6  1760
-#define NOTE_AS6 1865
-#define NOTE_B6  1976
-#define NOTE_C7  2093
-#define NOTE_CS7 2217
-#define NOTE_D7  2349
-#define NOTE_DS7 2489
-#define NOTE_E7  2637
-#define NOTE_F7  2794
-#define NOTE_FS7 2960
-#define NOTE_G7  3136
-#define NOTE_GS7 3322
-#define NOTE_A7  3520
-#define NOTE_AS7 3729
-#define NOTE_B7  3951
-#define NOTE_C8  4186
-#define NOTE_CS8 4435
-#define NOTE_D8  4699
-#define NOTE_DS8 4978
-#define NOTE_P0	 0000
+// Bluetooth
+
+#define PIN_SETUP_HC06			21
+#define HC06_CMD_SETNAME		1
+#define HC06_CMD_SETPIN			2
+
+// Melody data 
 
 #define AUDIO_MELODIES_BLTIN	5
 
@@ -427,21 +360,6 @@ const int LED_DISPLAY_CHARACTERS_LEN = sizeof(LED_DISPLAY_CHARACTERS) / sizeof(u
 #define GETSCROLLROW(c, b)				((byte)((c >> (8*b)) & 0xFF))
 #define GETDISPLAYROW(c, b)				((byte)((c >> (8*(7-b)) & 0xFF)))
 
-#define LED_DISPLAY_SMILE				0
-#define LED_DISPLAY_NEUTRAL				1
-#define LED_DISPLAY_FROWN				2	
-#define LED_DISPLAY_QUESTION			3
-#define LED_DISPLAY_OK					4
-#define LED_DISPLAY_TICK				5	
-#define LED_DISPLAY_CROSS				6	
-#define LED_DISPLAY_ROCK				7
-#define LED_DISPLAY_PAPER				8
-#define LED_DISPLAY_SISSORS				9	
-#define LED_DISPLAY_QUAVER				10
-#define LED_DISPLAY_QUAVERx2			11
-#define LED_DISPLAY_HEART				12
-#define LED_DISPLAY_BLANK				13 
-
 #define LED_SET_IMAGE					1
 #define LED_SET_SCROLL_TEXT				2
 #define LED_SET_NUMBER					3
@@ -453,8 +371,42 @@ const int LED_DISPLAY_CHARACTERS_LEN = sizeof(LED_DISPLAY_CHARACTERS) / sizeof(u
 #define LED_DISPLAY_TYPE_DIGITS			1
 #define LED_DISPLAY_TYPE_ASCII			2
 
+//==============================================================================
+// FUNCTIONS (CREATIVE ROBOTIX PLATFORM)
+//==============================================================================
 
+// constructor 
 CreativeRobotix::CreativeRobotix() {
+
+	// set up AUX and LINE inputs
+
+	pinMode(PIN_AUX_0, INPUT_PULLUP);
+	pinMode(PIN_AUX_1, INPUT_PULLUP);
+
+	pinMode(PIN_LINE1, INPUT);
+	pinMode(PIN_LINE2, INPUT);
+	pinMode(PIN_LINE3, INPUT);
+	pinMode(PIN_LINE4, INPUT);
+	pinMode(PIN_LINE5, INPUT);
+
+	// audio
+	pinMode(PIN_SPEAKER, OUTPUT);
+	
+	// servos attach()
+
+	_servos[PIN_LEFT_WHEEL_SERVO].attach(PIN_LEFT_WHEEL_SERVO);
+	_servos[PIN_RIGHT_WHEEL_SERVO].attach(PIN_RIGHT_WHEEL_SERVO);
+	_servos[PIN_LEFT_ARM_SERVO].attach(PIN_LEFT_ARM_SERVO);
+	_servos[PIN_RIGHT_ARM_SERVO].attach(PIN_RIGHT_ARM_SERVO);
+	_servos[PIN_HEAD_SERVO].attach(PIN_HEAD_SERVO);
+
+	// servos detach()
+
+	_servos[PIN_LEFT_WHEEL_SERVO].detach();
+	_servos[PIN_RIGHT_WHEEL_SERVO].detach();
+	_servos[PIN_LEFT_ARM_SERVO].detach();
+	_servos[PIN_RIGHT_ARM_SERVO].detach();
+	_servos[PIN_HEAD_SERVO].detach();
 
 	// Initialise the MAX72XX display 
 
@@ -463,68 +415,815 @@ CreativeRobotix::CreativeRobotix() {
 	_ledDisplay.clearDisplay(0);		// and clear the display
 }
 
+// initialise robot
 void CreativeRobotix::begin(void) {
 	// LED Display to neutral
 
-	setLEDDisplayImage(LED_DISPLAY_NEUTRAL);
+	_setLEDDisplayImage(DISPLAY_NEUTRAL);
 
 	// Say hello, I'm active
 	sayDirect("Hello World!");
 
-	setLEDDisplayImage(LED_DISPLAY_SMILE);
+	_setLEDDisplayImage(DISPLAY_SMILE);
 }
 
-void CreativeRobotix::restoreLEDDisplay(void){
+// LED Matrix display functions
+void CreativeRobotix::_restoreLEDDisplay(void){
 	switch (_ledDisplayType) {
 	case LED_DISPLAY_TYPE_IMAGES:
-		setLEDDisplayImage(_ledDisplayImage);
+		_setLEDDisplayImage(_ledDisplayImage);
 		break;
 	case LED_DISPLAY_TYPE_DIGITS:
-		setLEDDisplayDigits(_ledDisplayDigits);
+		_setLEDDisplayDigits(_ledDisplayDigits);
 		break;
 	case LED_DISPLAY_TYPE_ASCII:
-		setLEDDisplayASCII(_ledDisplayASCII);
+		_setLEDDisplayASCII(_ledDisplayASCII);
 		break;
 	default:
 		break;
 	}
 }
 
-void CreativeRobotix::setLEDDisplayImage(uint8_t image) {
+void CreativeRobotix::_setLEDDisplayImage(uint8_t image) {
 	uint64_t character;
 	character = pgm_read_dword(&(LED_DISPLAY_IMAGES[image][0])); // High
 	character = (character << 32) | pgm_read_dword(&(LED_DISPLAY_IMAGES[image][1])); // Low
-	setLEDisplay(character);
-	ledDisplayImage = image;
-	ledDisplayType = LED_DISPLAY_TYPE_IMAGES;
+	_setLEDisplay(character);
+	_ledDisplayImage = image;
+	_ledDisplayType = LED_DISPLAY_TYPE_IMAGES;
 }
 
-
-void CreativeRobotix::setLEDDisplayDigits(uint8_t number) {
+void CreativeRobotix::_setLEDDisplayDigits(uint8_t number) {
 	uint64_t digit_tens, digit_units;
 	digit_tens = pgm_read_dword(&(LED_DISPLAY_DIGITS[int(number / 10)][0])); // High
 	digit_tens = (digit_tens << 32) | pgm_read_dword(&(LED_DISPLAY_DIGITS[int(number / 10)][1])); // Low
 	digit_units = pgm_read_dword(&(LED_DISPLAY_DIGITS[number - (int(number / 10) * 10)][0])); // High
 	digit_units = (digit_units << 32) | pgm_read_dword(&(LED_DISPLAY_DIGITS[number - (int(number / 10) * 10)][1])); // Low
-	setLEDisplay((digit_tens >> 4) | digit_units);
-	ledDisplayDigits = number;
-	ledDisplayType = LED_DISPLAY_TYPE_DIGITS;
+	_setLEDisplay((digit_tens >> 4) | digit_units);
+	_ledDisplayDigits = number;
+	_ledDisplayType = LED_DISPLAY_TYPE_DIGITS;
 }
 
-
-void CreativeRobotix::setLEDDisplayASCII(uint8_t ascii) {
+void CreativeRobotix::_setLEDDisplayASCII(uint8_t ascii) {
 	uint64_t character;
-	character = pgm_read_dword(&(LED_DISPLAY_IMAGES[ascii][0])); // High
-	character = (character << 32) | pgm_read_dword(&(LED_DISPLAY_CHARACTERS[ascii][1])); // Low
-	setLEDisplay(character);
-	ledDisplayASCII = ascii;
-	ledDisplayType = LED_DISPLAY_TYPE_ASCII;
+	character = pgm_read_dword(&(LED_DISPLAY_CHARACTERS[ascii - ' '][0])); // High
+	character = (character << 32) | pgm_read_dword(&(LED_DISPLAY_CHARACTERS[ascii - ' '][1])); // Low
+	_setLEDisplay(character);
+	_ledDisplayASCII = ascii;
+	_ledDisplayType = LED_DISPLAY_TYPE_ASCII;
 }
 
-void CreativeRobotix::setLEDisplay(const uint64_t character)
+void CreativeRobotix::_setLEDisplay(const uint64_t character)
 {
 	for (uint8_t row = 0; row < 8; row++)
 	{
-		ledDisplay.setRow(0, row, GETDISPLAYROW(character, row));
+		_ledDisplay.setRow(0, row, GETDISPLAYROW(character, row));
+	}
+}
+
+void CreativeRobotix::_updateTextToSay(void) {
+	/* timer variables */
+	static uint8_t character = 0;
+	static boolean toneActive = false;
+	static unsigned long l_currentMillis;	// store the current value from millis()
+	static unsigned long l_previousMillis;	// for comparison with currentMillis
+	static unsigned long toneDuration;		// store current tone duration
+
+	l_currentMillis = millis();
+
+	if (character >= _textToSayLen) { // All done, reset
+		_isTextToSay = false;
+		character = 0;
+		_textToSayLen = 0;
+	}
+	else { // Still have a character to say, have we finished the tone?
+		if (!toneActive) { // If no active tone, play the next one
+			toneDuration = _textToSayBuffer[character] / 2;
+			tone(PIN_SPEAKER, (128 - _textToSayBuffer[character]) * 100, toneDuration); // convert character to suitable frequency, currently arbitary, update?
+			toneActive = true;
+			l_previousMillis = l_currentMillis;
+		}
+		else { // update timmer and tone
+			if ((l_currentMillis - l_previousMillis) > toneDuration) { // tone duration reached
+				noTone(PIN_SPEAKER);
+				toneActive = false;
+				character++; // next character
+			}
+		}
+	}
+}
+
+void CreativeRobotix::_setMelodytoPlay(uint8_t melody) {
+	_melodyRecordStart = 0; // Reset the record start
+
+	for (uint8_t i = 0; i < melody; i++) {  // Work out melodies location
+		_melodyRecordStart += pgm_read_word(&(AUDIO_MELODIES_NOTES[_melodyRecordStart])) + 1; // melody record number_of_notes (+1);
+	}
+
+	_melodyToPlayLen = pgm_read_word(&(AUDIO_MELODIES_NOTES[_melodyRecordStart]));
+
+	_melodyRecordStart = _melodyRecordStart + 1; // offset the melody record start for first note in record
+}
+
+void CreativeRobotix::_updateMelodyToPlay(boolean isUserMelody) {
+	/* timer variables */
+	static uint8_t note = 0;
+	static uint16_t noteFrequency;
+	static boolean noteActive = false, notePause = false;
+	static unsigned long l_currentMillis;	// store the current value from millis()
+	static unsigned long l_previousMillis;	// for comparison with currentMillis
+	static unsigned long noteDuration;		// store current note duration
+	static unsigned long notePauseDuration;	// store current note duration
+
+	l_currentMillis = millis();
+
+	if (note >= _melodyToPlayLen) { // All done, reset
+		_isMelodyToPlay = false;
+		note = 0;
+		_melodyToPlayLen = 0;
+	}
+	else { // Still have a note to play, have we finished the note?
+		if (!noteActive) { // If no active note, play the next one
+			if (isUserMelody) {
+				noteDuration = ((1000.0 / _melodyToPlaySpeed) / (float)_melodyToPlayDurationBuffer[note]);
+				noteFrequency = _melodyToPlayNoteBuffer[note];
+			}
+			else {
+				noteDuration = ((1000.0 / _melodyToPlaySpeed) / (float)pgm_read_byte(&(AUDIO_MELODIES_DURATIONS[_melodyRecordStart + note])));
+				noteFrequency = pgm_read_word(&(AUDIO_MELODIES_NOTES[_melodyRecordStart + note]));
+			}
+			tone(PIN_SPEAKER, noteFrequency, noteDuration);
+			noteActive = true;
+			l_previousMillis = l_currentMillis;
+		}
+		else { // update timmer and tone
+			if (!notePause) {
+				if ((l_currentMillis - l_previousMillis) > noteDuration) { // tone duration reached
+					notePauseDuration = noteDuration * 0.30; // 30% seems to work well
+					notePause = true;
+					l_previousMillis = l_currentMillis;
+				}
+			}
+			else {
+				if ((l_currentMillis - l_previousMillis) > notePauseDuration) {
+					noTone(PIN_SPEAKER);
+					notePause = false;
+					noteActive = false;
+					note++; // next note
+				}
+			}
+		}
+	}
+}
+
+void CreativeRobotix::_updateTextToScroll(boolean reset) {
+	static uint8_t character = 0, character_previous = 1, character_scroll = 0, cindex;
+	static unsigned long l_currentMillis;	// store the current value from millis()
+	static unsigned long l_previousMillis;	// for comparison with currentMillis
+	static uint64_t current_character = 0, screen = 0, column_update;
+
+	l_currentMillis = millis();
+
+	if (reset) {  // Reset the state
+		character = 0;
+		character_previous = 1, character_scroll = 0;
+		current_character = 0, screen = 0, column_update = 0;
+	}
+
+	if ((l_currentMillis - l_previousMillis) > _scrollInterval) {
+		// update screen buffer 
+
+		if (character_scroll >= MAX72XX_WIDTH) {  // time to shift in next character? 
+			character = (character + 1) % _textToScrollLen;
+			character_scroll = 0;
+		}
+
+		if (character != character_previous) {  // shift in next character on character change
+			character_previous = character;
+			cindex = _textToScrollBuffer[character] - ' ';  // characters start from 0x20 or ASCII ' ' 
+			current_character = pgm_read_dword(&(LED_DISPLAY_CHARACTERS[cindex][0])); // High
+			current_character = (current_character << 32) | pgm_read_dword(&(LED_DISPLAY_CHARACTERS[cindex][1])); // Low
+		}
+
+		screen = _shiftScreenLeft(screen);  // shift screen left one column, update to selected column shifts and or direction 
+		column_update = (current_character & (0x0101010101010101 << character_scroll)) << ((MAX72XX_WIDTH - 1) - character_scroll); // character_scroll selects next column to shift in on the right
+		screen = screen | column_update; // update the screen with the column 
+
+		// update screen
+
+		_setLEDisplay(screen);
+
+		// update variables
+		character_scroll++;
+		l_previousMillis = l_currentMillis;
+
+		// TODO: Multi screen scroll 
+	}
+}
+
+uint64_t CreativeRobotix::_shiftScreenLeft(uint64_t screen) {
+	uint64_t new_screen = 0;
+
+	for (int8_t row = MAX72XX_WIDTH - 1; row >= 0; row--) {
+		new_screen = (new_screen << 8) | ((GETSCROLLROW(screen, row) >> 1) & 0xFF);  // columns are labeled left to right from 1 to 7, hence sifts are opposit in sense, may physically invert the screen to fix?
+	}
+
+	return (new_screen);
+}
+
+void CreativeRobotix::_setVelocityLeftWheel(uint8_t velocity) {
+	if (!_servos[PIN_LEFT_WHEEL_SERVO].attached()) _servos[PIN_LEFT_WHEEL_SERVO].attach(PIN_LEFT_WHEEL_SERVO);
+
+	_servos[PIN_LEFT_WHEEL_SERVO].write(velocity);
+
+	if (velocity == 90) _servos[PIN_LEFT_WHEEL_SERVO].detach();
+}
+
+void CreativeRobotix::_setVelocityRightWheel(uint8_t velocity) {
+	if (!_servos[PIN_RIGHT_WHEEL_SERVO].attached()) _servos[PIN_RIGHT_WHEEL_SERVO].attach(PIN_RIGHT_WHEEL_SERVO);
+
+	_servos[PIN_RIGHT_WHEEL_SERVO].write(velocity);
+
+	if (velocity == 90) _servos[PIN_RIGHT_WHEEL_SERVO].detach();
+}
+
+void CreativeRobotix::_setHead(uint8_t angle) {
+
+	if (!_servos[PIN_HEAD_SERVO].attached()) _servos[PIN_HEAD_SERVO].attach(PIN_HEAD_SERVO);
+
+	if (angle < (90 - HEAD_SWING_MAX_DEGREES)) angle = 90 - HEAD_SWING_MAX_DEGREES;
+	if (angle > (90 + HEAD_SWING_MAX_DEGREES)) angle = 90 + HEAD_SWING_MAX_DEGREES;
+
+	_servos[PIN_HEAD_SERVO].write(angle);
+}
+
+void CreativeRobotix::_updateHeadSwing(void) {
+	static uint8_t angle = 90;
+	static int8_t direction = 1;
+	static unsigned long l_currentMillis;	// store the current value from millis()
+	static unsigned long l_previousMillis;	// for comparison with currentMilli()
+
+	l_currentMillis = millis();
+
+	if ((l_currentMillis - l_previousMillis) > _headSwingInterval) {
+
+		angle = angle + (_headSwingSpeed * direction);
+
+		if (angle < (90 - HEAD_SWING_MAX_DEGREES) || angle >(90 + HEAD_SWING_MAX_DEGREES)) direction = direction * -1; // change direction
+
+		_setHead(angle);
+
+		// update variables
+		l_previousMillis = l_currentMillis;
+	}
+}
+
+void CreativeRobotix::_updateArmsSwing(void) {
+	static uint8_t angle = 90;
+	static int8_t direction = 1;
+	static unsigned long l_currentMillis;	// store the current value from millis()
+	static unsigned long l_previousMillis;	// for comparison with currentMilli()
+
+	l_currentMillis = millis();
+
+	if ((l_currentMillis - l_previousMillis) > _armSwingInterval) {
+
+		if (angle < (90 - ARM_SWING_MAX_DEGREES) || angle >(90 + ARM_SWING_MAX_DEGREES)) direction = direction * -1; // change direction
+
+		angle = angle + (_armSwingSpeed * direction);
+
+		_setLeftArm(angle);
+		_setRightArm(angle);
+
+		// update variables
+		l_previousMillis = l_currentMillis;
+	}
+}
+
+void CreativeRobotix::_setLeftArm(uint8_t angle) {
+	// Enable servos?
+	if (!_servos[PIN_LEFT_ARM_SERVO].attached()) _servos[PIN_LEFT_ARM_SERVO].attach(PIN_LEFT_ARM_SERVO);
+
+	if (angle < (90 - ARM_MAX_DEGREES)) angle = 90 - ARM_MAX_DEGREES;
+	if (angle > (90 + ARM_MAX_DEGREES)) angle = 90 + ARM_MAX_DEGREES;
+
+	_servos[PIN_LEFT_ARM_SERVO].write(angle);
+}
+
+void CreativeRobotix::_setRightArm(uint8_t angle) {
+	// Enable servos?
+	if (!_servos[PIN_RIGHT_ARM_SERVO].attached()) _servos[PIN_RIGHT_ARM_SERVO].attach(PIN_RIGHT_ARM_SERVO);
+
+	if (angle < (90 - ARM_SWING_MAX_DEGREES)) angle = 90 - ARM_SWING_MAX_DEGREES;
+	if (angle > (90 + ARM_SWING_MAX_DEGREES)) angle = 90 + ARM_SWING_MAX_DEGREES;
+
+	_servos[PIN_RIGHT_ARM_SERVO].write(angle);
+}
+
+void CreativeRobotix::_servoStop(uint8_t servo) {
+	_servos[servo].detach();
+}
+
+uint32_t CreativeRobotix::_readVcc(void)
+{
+	// Decide if we have battery power i.e. a value > 4700 (or 4.7 volts)
+	int32_t result;
+	// Read 1.1V reference against AVcc
+	ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+	delay(2); // Wait for Vref to settle
+	ADCSRA |= _BV(ADSC); // Convert
+	while (bit_is_set(ADCSRA, ADSC));
+	result = ADCL;
+	result |= ADCH << 8;
+	result = 1126400L / result; // Back-calculate AVcc in mV
+	return result;
+}
+
+void CreativeRobotix::sayDirect(String text) {
+	// Say text string, uses delay, private use only
+	for (uint8_t i = 0; i < text.length(); i++) {
+		if (text[i] < 128) {
+			tone(PIN_SPEAKER, (128 - text[i]) * 100, text[i] / 2); // Arbitary frequency mapping, for printable characters only.
+			delay(text[i] / 2);
+			noTone(PIN_SPEAKER);
+		}
+	}
+}
+
+void CreativeRobotix::update(void) {
+	if (_isTextToSay) _updateTextToSay();
+	if (_isTextToScroll) _updateTextToScroll(false);
+	if (_isArmsSwing) _updateArmsSwing();
+	if (_isHeadSwing) _updateHeadSwing();
+	if (_isMelodyToPlay) _updateMelodyToPlay(_isUserMelody);
+}
+
+boolean CreativeRobotix::say(String text) {
+	if (text.length() < TEXT_TO_SAY_BUFFER_LEN) {
+		strcpy((char*)_textToSayBuffer, text.c_str());
+		_textToSayLen = text.length();
+		_isTextToSay = true;
+		return(true);
+	}
+	return(false);
+}
+
+boolean CreativeRobotix::hasTextToSay(void) {
+	return(_isTextToSay);
+}
+
+boolean CreativeRobotix::displayScrollText(String text) {
+	if (text.length() < TEXT_TO_SCROLL_BUFFER_LEN) {
+		strcpy((char*)_textToScrollBuffer, text.c_str());
+		_textToScrollLen = text.length();
+		_isTextToScroll = true;
+		return(true);
+	}
+	return(false);
+}
+
+boolean CreativeRobotix::hasTextToScroll(void) {
+	return(_isTextToScroll);
+}
+
+boolean CreativeRobotix::displayImage(uint8_t image) {
+	if (image < LED_DISPLAY_IMAGES_LEN) {
+		_isTextToScroll = false;
+		_setLEDDisplayImage(image);
+		return(true);
+	}
+	return (false);
+}
+
+boolean CreativeRobotix::displayDigits(uint8_t number) {
+	if (number >=0 && number < LED_DIGITS_LEN * 10) {
+		_isTextToScroll = false;
+		_setLEDDisplayDigits(number);
+		return(true);
+	}
+	return (false);
+}
+
+boolean CreativeRobotix::displayASCII(uint8_t ascii) {
+	if (ascii >= 0 && ascii < LED_DISPLAY_CHARACTERS_LEN) {
+		_isTextToScroll = false;
+		_setLEDDisplayASCII(ascii);
+		return(true);
+	}
+	return (false);
+}
+
+boolean CreativeRobotix::displayPixel(uint8_t row, uint8_t column, boolean state) {
+	if ((row >= 0 && row < MAX72XX_WIDTH) && (column >= 0 && column < MAX72XX_HEIGHT)) {
+		_ledDisplay.setLed(0, column, row, state);
+		return(true);
+	}
+	return(false);
+}
+
+boolean CreativeRobotix::displayClear(void) {
+	_isTextToScroll = false;
+	_setLEDDisplayImage(DISPLAY_BLANK);
+}
+
+boolean CreativeRobotix::displayReset(void) {
+	_isTextToScroll = false;
+	_restoreLEDDisplay();
+}
+
+boolean CreativeRobotix::displayCustom(uint64_t screen) {
+	_setLEDisplay(screen);
+}
+
+boolean CreativeRobotix::playMelody(uint8_t melody) {
+	_setMelodytoPlay(melody % AUDIO_MELODIES_BLTIN);
+	_isUserMelody = false;
+	_isMelodyToPlay = true;
+	return(true);
+}
+
+boolean CreativeRobotix::playCustom(uint16_t notes[], uint8_t duration[], uint8_t notesToPlay) {
+	_melodyToPlayLen = 0;
+
+	for (uint8_t note = 0; note < notesToPlay && (_melodyToPlayLen < MELODY_TO_PLAY_BUFFER_LEN); note++) { // Silently drop notes > MAX_BUFFER
+
+		_melodyToPlayNoteBuffer[_melodyToPlayLen] = notes[note];
+		_melodyToPlayDurationBuffer[_melodyToPlayLen] = duration[note];
+		_melodyToPlayLen++;
+	}
+
+	_isUserMelody = true;
+	_isMelodyToPlay = true;
+	return(true);
+}
+
+boolean CreativeRobotix::playTone(uint16_t frequency, uint16_t duration) {
+	_melodyToPlayNoteBuffer[0] = frequency;
+	_melodyToPlayDurationBuffer[0] = (1000.0 / (float)(duration)) / _melodyToPlaySpeed; // Rescale with melodyToPlaySpeed
+	_melodyToPlayLen = 1;
+	_isUserMelody = true;
+	_isMelodyToPlay = true;
+	return (true);
+}
+
+boolean CreativeRobotix::setMelodySpeed(uint8_t tempo) {
+	if (tempo > 0 && tempo <= 10) {
+		_melodyToPlaySpeed = (float)(tempo * 100) / 100.0; // why do this?
+		return (true);
+	}
+	return(false);
+}
+
+boolean CreativeRobotix::hasMelodytoPlay(void) {
+	return(_isMelodyToPlay);
+}
+
+uint8_t CreativeRobotix::readUltrasound(void) {
+	return(_sonar.ping_cm()); // Take reading in cm
+}
+
+uint8_t CreativeRobotix::readUltrasoundMedian(uint8_t window) {
+	return(_sonar.convert_cm(_sonar.ping_median(window))); // Take reading in cm
+}
+
+void CreativeRobotix::readLineSensors(void) {
+	lineSensors[0] = digitalRead(PIN_LINE1);
+	lineSensors[1] = digitalRead(PIN_LINE2);
+	lineSensors[2] = digitalRead(PIN_LINE3);
+	lineSensors[3] = digitalRead(PIN_LINE4);
+	if (analogRead(PIN_LINE5) > 750) {
+		lineSensors[4] = true;
+	}
+	else {
+		lineSensors[4] = false;
+	}
+}
+
+void CreativeRobotix::readAuxInputs(void) {
+	auxInputs[0] = analogRead(PIN_AUX_0);
+	auxInputs[1] = analogRead(PIN_AUX_1);
+}
+
+void CreativeRobotix::readLine(void) {
+	uint8_t online = 0, position = 0;
+	
+	// read line position
+	readLineSensors();
+
+	// count weighted sum of sensors online
+	for (uint8_t i = 0; i < LINE_SENSORS; i++) {
+		if (lineSensors[i] == false) {
+			online = online + 1;
+			position = position + (i + 1);
+		}
+	}
+
+	// position on line 0 center; >0 right of line; <0 left of line 
+	if (!online) {
+		linePosition = LINE_SENSORS + 1;
+		lineState = (2 * LINE_SENSORS);
+	}
+	else if (online == LINE_SENSORS) {
+		linePosition = LINE_SENSORS;
+		lineState = (2 * LINE_SENSORS) - 1;
+	}
+	else {
+		linePosition = ((float)position / (float)online) - 3.0; // 3.0 represents the centre linesensor
+		lineState = 2 * (linePosition + 2);
+	}
+}
+
+void CreativeRobotix::wheelLeft(int8_t velocity) {
+	velocity = 90 + velocity;
+
+	if (velocity < 0) {
+		velocity = 0;
+	}
+	else if (velocity > 180) {
+		velocity = 180;
+	}
+
+	_setVelocityLeftWheel(velocity);
+}
+
+void CreativeRobotix::wheelRight(int8_t velocity) {
+	velocity = 90 - velocity;
+
+	if (velocity < 0) {
+		velocity = 0;
+	}
+	else if (velocity > 180) {
+		velocity = 180;
+	}
+
+	_setVelocityRightWheel(velocity);
+}
+
+boolean CreativeRobotix::hasStopped(void) {
+	if (_servos[PIN_RIGHT_WHEEL_SERVO].read() == 90) {
+		return(true);
+	}
+
+	return(false);
+}
+
+void CreativeRobotix::headAngle(int8_t angle, boolean state) {
+	if (state) {
+		angle = 90 + angle;
+
+		_setHead(angle); // detach servo after setting angle
+	}
+	else
+	{
+		_servoStop(PIN_HEAD_SERVO);
+	}
+}
+
+void CreativeRobotix::lookAround(uint8_t speed, boolean state) {
+	
+	if (state) {
+		if (speed > HEAD_SWING_MAX_SPEED) speed = HEAD_SWING_MAX_SPEED;
+		_headSwingSpeed = speed;
+		_isHeadSwing = true;
+	}
+	else {
+		_isHeadSwing = false;
+		_servoStop(PIN_HEAD_SERVO);
+	}
+}
+
+void CreativeRobotix::swingArms(uint8_t speed, boolean state) {
+	if (state) {
+		if (speed > ARMS_SWING_MAX_SPEED) speed = ARMS_SWING_MAX_SPEED;
+		_armSwingSpeed = speed;
+		_isArmsSwing = true;
+	}
+	else {
+		_isArmsSwing = false;
+		_servoStop(PIN_LEFT_ARM_SERVO);
+		_servoStop(PIN_RIGHT_ARM_SERVO);
+	}
+}
+
+void CreativeRobotix::armLeft(int8_t angle, boolean state) {
+	if (state) {
+		if (angle < -ARM_MAX_DEGREES) angle = -ARM_MAX_DEGREES;
+		if (angle > ARM_MAX_DEGREES) angle = ARM_MAX_DEGREES;
+
+		angle = 90 - angle;
+
+		_setLeftArm(angle);
+	}
+	else {
+		_servoStop(PIN_LEFT_ARM_SERVO);
+	}
+}
+
+void CreativeRobotix::armRight(int8_t angle, boolean state) {
+	if (state) {
+		if (angle < -ARM_MAX_DEGREES) angle = -ARM_MAX_DEGREES;
+		if (angle > ARM_MAX_DEGREES) angle = ARM_MAX_DEGREES;
+
+		angle = 90 + angle;
+
+		_setRightArm(angle);
+	}
+	else {
+		_servoStop(PIN_RIGHT_ARM_SERVO);
+	}
+}
+
+uint8_t CreativeRobotix::readBatteryVoltage(void) {
+	return(_readVcc()/100);
+}
+boolean CreativeRobotix::btConfigure(String myRobotsName, uint16_t myRobotsPin) {
+	uint8_t i;
+	boolean btatcrlf = true;
+	String response, command;
+	unsigned long baudrate[] = { 57600, 9600, 1200, 2400, 4800, 19200, 38400, 115200 };
+
+	if (analogRead(PIN_SETUP_HC06) > 50) { // Nothing to do 
+		return (false);
+	}
+
+	// Discover HC-06 current baudrate
+
+	uint8_t baudrates = sizeof(baudrate) / sizeof(baudrate[0]);
+
+	for (i = 0; i < baudrates; i++) {
+
+		// Try to connect
+		sayDirect("ATAT");
+		Serial.begin(baudrate[i]);
+
+		// Two types of firmwaire to deal with, types which require <CR><LF>, and types that do not
+
+		// Are we dealing with HC-05 type firmaware requiring <CR><LF>?
+
+		Serial.print("AT\r\n");
+		Serial.setTimeout(1000);
+		response = Serial.readString();
+
+		Serial.print("AT\r\n");			// TODO: Find out why this only works the second time, timming? Delays?
+		Serial.setTimeout(1000);
+		response = Serial.readString();
+
+		// Were we successful? 
+
+		if (response.startsWith("OK")) {
+			break; // Yes, got it.
+		}
+
+		// Are we deadling with HC-06 firware with NO <CR><LF> needed?
+
+		Serial.print("AT");
+		Serial.setTimeout(1000);
+		response = Serial.readString();
+
+		Serial.print("AT");			// TODO: Find out why this only works the second time, timming? Delays?
+		Serial.setTimeout(1000);
+		response = Serial.readString();
+
+		// Were we successful? 
+
+		if (response.startsWith("OK")) {
+			btatcrlf = false;
+			break; // Yes, got it.
+		}
+
+		Serial.end();
+	}
+
+	if (i == baudrates) { // Couldn't connect to the HC-06
+		while (1) { sayDirect("{}"); delay(100); }; // Sound the alarm... 
+	}
+
+	// All good, let's congigure... 
+
+	// Set Name
+	// TODO restrict name to 20 characters 
+	(btatcrlf) ? command = (String)"AT+NAME" + (String)myRobotsName + (String)"\r\n" : command = (String)"AT+NAME" + (String)myRobotsName;
+	Serial.print(command);
+	Serial.setTimeout(3000);
+	delay(500);
+	sayDirect("OK");
+	// Set Pin
+
+	(btatcrlf) ? command = (String)"AT+PIN" + myRobotsPin + (String)"\r\n" : command = (String)"AT+PIN" + myRobotsPin;
+	Serial.print(command);
+	Serial.setTimeout(3000);
+	delay(500);
+	sayDirect("OK");
+
+	// Disable indications
+
+	(btatcrlf) ? command = (String)"AT+ENABLEIND0" + (String)"\r\n" : command = (String)"AT+ENABLEIND0";
+	Serial.print(command);
+	Serial.setTimeout(3000);
+	delay(500);
+	sayDirect("OK");
+
+	// Set S4A Baud rate
+
+	(btatcrlf) ? command = (String)"AT+BAUD7" + (String)"\r\n" : command = (String)"AT+BAUD7";
+
+	Serial.print(command);
+	Serial.setTimeout(3000);
+	delay(500);
+	sayDirect("OK");
+
+	Serial.end();
+
+	// setup complete
+	return(true);
+}
+
+void CreativeRobotix::btSetName(String myRobotName) {
+	// Type HC05 firmware
+	Serial.print("AT\r\n");
+	Serial.setTimeout(1000);
+	String responsecrlf = Serial.readString();
+
+	// Type HC06 firmware
+	Serial.print("AT");
+	Serial.setTimeout(1000);
+	String response = Serial.readString();
+
+	// Were we successful?
+
+	if (responsecrlf.startsWith("OK") || response.startsWith("OK")) {
+
+		String hc06Command = "AT+NAME";  // Build command string
+
+		hc06Command += myRobotName;
+
+		// type HC05 firmware
+		if (responsecrlf.startsWith("OK")) {
+			hc06Command += (String)"\r\n";
+			Serial.print(hc06Command);
+			Serial.setTimeout(3000);
+			delay(500);
+			Serial.print(hc06Command);
+			Serial.setTimeout(3000);
+			delay(500);
+		}
+
+		//type HC06 firmware
+		if (response.startsWith("OK")) {
+			Serial.print(hc06Command);
+			Serial.setTimeout(3000);
+			delay(500);
+		}
+
+		sayDirect("ok ok ok");
+	}
+	else
+	{
+		sayDirect("{}{}{}{}{}{}{}{}{}"); // Signal Error
+	}
+}
+
+void CreativeRobotix::btSetPin(uint16_t myRobotPin) {
+	// Type HC05 firmware
+	Serial.print("AT\r\n");
+	Serial.setTimeout(1000);
+	String responsecrlf = Serial.readString();
+
+	// Type HC06 firmware
+	Serial.print("AT");
+	Serial.setTimeout(1000);
+	String response = Serial.readString();
+
+	// Were we successful?
+
+	if (responsecrlf.startsWith("OK") || response.startsWith("OK")) {
+
+		String hc06Command = "AT+PIN";  // Build command string
+
+		hc06Command += String(myRobotPin);
+
+		// type HC05 firmware
+		if (responsecrlf.startsWith("OK")) {
+			hc06Command += (String)"\r\n";
+			Serial.print(hc06Command);
+			Serial.setTimeout(3000);
+			delay(500);
+			Serial.print(hc06Command);
+			Serial.setTimeout(3000);
+			delay(500);
+		}
+
+		//type HC06 firmware
+		if (response.startsWith("OK")) {
+			Serial.print(hc06Command);
+			Serial.setTimeout(3000);
+			delay(500);
+		}
+
+		sayDirect("ok ok ok");
+	}
+	else
+	{
+		sayDirect("{}{}{}{}{}{}{}{}{}"); // Signal Error
 	}
 }
